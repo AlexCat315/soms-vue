@@ -10,24 +10,25 @@ import { fileURLToPath, URL } from 'url';
 
 export default defineConfig({
   server: {
-    host: '127.0.0.1',
-    port: 5173
+    host: "127.0.0.1",
+    port: 5173,
   },
   plugins: [
     vue(),
     AutoImport({
-      resolvers: [ElementPlusResolver()]
+      imports: ["vue", "@vueuse/core"],
+      resolvers: [ElementPlusResolver()],
+      dirs: ["./composables/**"],
+      vueTemplate: true,
     }),
     Components({
-      resolvers: [
-        ElementPlusResolver(),
-      ]
-    })
+      resolvers: [ElementPlusResolver()],
+    }),
   ],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('src', import.meta.url))
+      "@": fileURLToPath(new URL("src", import.meta.url)),
     },
-    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json']
-  }
+    extensions: [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json"],
+  },
 });

@@ -151,6 +151,7 @@ const toRegister = () => {
   font-weight: bold;
   color: #333;
   text-align: center;
+  font-family: System, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
 }
 
 .logo-container {
