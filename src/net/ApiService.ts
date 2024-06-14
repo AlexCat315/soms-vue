@@ -3,7 +3,7 @@ import { ElMessage } from "element-plus";
 
 // 默认错误处理函数
 const defaultError = (err: any) => ElMessage.error("发生了一些错误");
-const defaultFailure = (message: string) => ElMessage.warning(message);
+const defaultFailure = (message: any) => ElMessage.warning(message);
 
 // 设置 Axios 全局配置
 axios.defaults.withCredentials = true;
@@ -30,17 +30,20 @@ function post(
 }
 
 // GET 请求封装
-function get(url: string, success: (arg0: any, arg1: any) => void, failure = defaultFailure, error = defaultError) {
-  axios
-    .get(url)
-    .then(({ data }) => {
-      if (data.success) {
-        success(data.message, data.status);
-      } else {
-        failure(data.message);
-      }
-    })
-    .catch((err) => error(err));
+// GET 请求封装
+function get(url: string): Promise<any> {
+  return new Promise((resolve, reject) => {
+    axios
+      .get(url)
+      .then(({ data }) => {
+        if (data.code === 200) {
+          resolve(data);
+        } else {
+          reject(data.message);
+        }
+      })
+      .catch((err) => reject(err));
+  });
 }
 
 export default {
