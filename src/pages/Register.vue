@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { reactive } from "vue";
-import http from "@/net/api/account/Login";
+import http from "@/net/api/account/Register";
 import router from "@/routers/Router";
 import { ElMessage } from "element-plus";
 
@@ -8,26 +8,31 @@ import { ElMessage } from "element-plus";
 const form = reactive({
   username: "",
   password: "",
-  rememberMe: false,
+  rePassword: "",
+  recommendCode: "",
 });
 
 const onSubmit = () => {
-  console.log("submit");
-  http.login(
+    console.log("submit");
+  if (form.password!== form.rePassword) {
+    ElMessage.error("两次密码输入不一致！");
+    return;
+  }
+  http.register(
     form,
     (data: any) => {
       console.log(data);
-      ElMessage.success("登录成功！");
-      router.push("/");
+      ElMessage.success("注册成功！");
+      router.push("/login");
     },
     () => {
-      ElMessage.error("登录失败！");
+      ElMessage.error("注册失败！");
     }
   );
 };
-const toRegister = () => {
-  console.log("to register!");
-  router.push("/register");
+const toLogin = () => {
+  router.push("/login");
+  console.log("to login!");
 };
 </script>
 
@@ -58,11 +63,11 @@ const toRegister = () => {
             color: #333;
           "
         >
-          立即登录
+          加入我们
         </h1>
       </div>
 
-      <div style="margin-top: 40px">
+      <div style="margin-top: 10px">
         <el-form :model="form" label-width="auto" style="max-width: 600px">
           <el-form-item
             style="
@@ -87,37 +92,59 @@ const toRegister = () => {
               v-model="form.password"
             />
           </el-form-item>
-          <el-form-item prop="remember">
-            <el-checkbox
-              type="info"
-              style="font-family: 'Microsoft YaHei UI', sans-serif"
-              v-model="form.rememberMe"
-              label="7天自动登录"
+          <el-form-item
+            style="
+              margin-top: 30px;
+              font-family: 'Microsoft YaHei UI', sans-serif;
+              margin-left: 10px;
+            "
+            label="重复密码:"
+          >
+            <el-input
+              style="width: 90%"
+              type="password"
+              v-model="form.rePassword"
             />
           </el-form-item>
+          <el-form-item
+            style="
+              margin-top: 30px;
+              font-family: 'Microsoft YaHei UI', sans-serif;
+              margin-left: 10px;
+            "
+            label="邀请码:"
+          >
+            <el-input
+              style="width: 90%"
+              type="text"
+              v-model="form.recommendCode"
+              placeholder="选填"
+            />
+          </el-form-item>
+
           <el-form-item>
             <el-button
               style="height: 40px; width: 150px; margin-left: 120px"
-              type="primary"
+              type="success"
               plain
               round
               @click="onSubmit"
-              >登 录</el-button
+              >注册</el-button
             >
           </el-form-item>
         </el-form>
 
         <div>
-          <el-divider @click="toRegister" class="register-divider"
-            >没有账号？</el-divider
+          <el-divider @click="toLogin" class="register-divider"
+            >已有账号？</el-divider
           >
           <el-button
             style="height: 40px; width: 150px; margin-left: 120px"
-            type="success"
+            type="primary"
             plain
             round
-            @click="toRegister"
-            >立即注册</el-button
+            @click="toLogin"
+            >返回登录</el-button
           >
         </div>
       </div>
@@ -145,7 +172,7 @@ const toRegister = () => {
 }
 .title {
   position: absolute;
-  margin-top: 100px;
+  margin-top: 70px;
   margin-left: 40%;
   font-size: 36px;
   font-weight: bold;
