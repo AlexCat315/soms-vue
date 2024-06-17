@@ -108,7 +108,7 @@
         </el-header>
 
         <el-main>
-          <UserManag />
+          <UserManage />
         </el-main>
       </el-container>
     </el-container>
@@ -122,7 +122,7 @@ import {
   Fold,
   User,
 } from "@element-plus/icons-vue";
-import UserManag from "@/components/UserManag.vue";
+import UserManage from "@/components/UserManage.vue";
 
 const collapseBtnClass = ref("el-icon-s-fold");
 const isCollapse = ref(false);

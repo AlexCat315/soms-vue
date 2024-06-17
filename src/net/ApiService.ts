@@ -2,7 +2,7 @@ import axios from "axios";
 import { ElMessage } from "element-plus";
 
 // 默认错误处理函数
-const defaultError = (err: any) => ElMessage.error("发生了一些错误");
+const defaultError = (err: any) => ElMessage.error(err.message);
 const defaultFailure = (message: any) => ElMessage.warning(message);
 
 // 设置 Axios 全局配置
@@ -23,7 +23,7 @@ function post(
       if (data.code === 200) {
         success(data.data);
       } else {
-        failure(data.message);
+        failure(data.msg);
       }
     })
     .catch((err) => error(err));

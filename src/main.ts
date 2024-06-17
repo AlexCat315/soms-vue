@@ -16,7 +16,7 @@ app.use(VueCookies);
 app.mount('#app')
 
 // 开发
-const devIP = ref("http://localhost:12345/supermarket-order-management-system/");
+const devIP = ref("http://localhost:12345/");
 //生产
 const prodIP = ref("ontip.xyz")
 
