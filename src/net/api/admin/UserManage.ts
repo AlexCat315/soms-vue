@@ -5,8 +5,8 @@ function getUserInfoList(params: any, success: any, error: any) {
   http.post(
     url,
     {
-      pageSize: params.value.pagesSize,
-      pageSizeIndex: params.value.pagesSizeIndex,
+      pageSize: params.value.pageSize,
+      pageSizeIndex: params.value.currentPage,
     },
     success,
     error

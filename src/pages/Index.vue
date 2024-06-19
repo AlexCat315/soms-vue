@@ -101,7 +101,9 @@
               <el-dropdown-menu>
                 <el-dropdown-item>个人信息</el-dropdown-item>
                 <el-dropdown-item>修改密码</el-dropdown-item>
-                <el-dropdown-item>退出</el-dropdown-item>
+                <el-dropdown-item @click="handleClickLogout()"
+                  >退出</el-dropdown-item
+                >
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -117,12 +119,11 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import {
-
-  Fold,
-  User,
-} from "@element-plus/icons-vue";
+import { Fold, User } from "@element-plus/icons-vue";
 import UserManage from "@/components/UserManage.vue";
+import logout from "@/net/api/account/logout";
+import router from "@/routers/Router";
+import { ElMessage } from "element-plus";
 
 const collapseBtnClass = ref("el-icon-s-fold");
 const isCollapse = ref(false);
@@ -141,7 +142,22 @@ const collape = () => {
     logoTextShow.value = true;
   }
 };
-
+const handleClickLogout = () => {
+  logout.logout(
+    {},
+    (data: any) => {
+      console.log("logout success");
+      // 清除指定的sessionStorage
+      sessionStorage.removeItem("accountSessionToken");
+      router.push("/login");
+      ElMessage.success("退出成功");
+    },
+    (err: any) => {
+      console.log(err);
+      ElMessage.error("退出失败,请联系管理员");
+    }
+  );
+};
 </script>
 
 <style scoped>

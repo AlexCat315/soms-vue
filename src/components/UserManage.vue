@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import {
   Search,
   CirclePlus,
@@ -8,15 +8,22 @@ import {
   SoldOut,
   EditPen,
   Delete,
+  ArrowDown,
 } from "@element-plus/icons-vue";
-import { ArrowDown } from "@element-plus/icons-vue";
 import http from "@/net/api/admin/UserManage";
 import { ElMessage } from "element-plus";
 
+
+
+const pageSizeOptions = ref([5, 10, 20, 30, 40, 50]);
+const currentPage = ref(1);
+const pageSizeIndexValue = ref(pageSizeOptions.value[0]);
+
 const requestParams = ref({
-  pagesSize: 10,
-  pagesSizeIndex: 0,
+  pageSize: pageSizeIndexValue.value,
+  currentPage: currentPage.value - 1,
 });
+
 const UserList = ref([
   {
     id: 0,
@@ -29,18 +36,42 @@ const UserList = ref([
     recommendId: 0,
   },
 ]);
-onMounted(() => {
+const total = ref(0);
+const getTotal = () => {
+  const params = ref({
+    pageSize: 0,
+    currentPage: 0,
+  });
   http.getUserInfoList(
-    requestParams,
+    params,
     (data: any) => {
-      UserList.value = data;
-      console.log(data);
+      const list = ref([]);
+      list.value = data;
+      total.value = data.length;
     },
     (err: any) => {
       console.log(err);
       ElMessage.error("未获得相关权限");
     }
   );
+};
+const fetchUserList = () => {
+  http.getUserInfoList(
+    requestParams,
+    (data: any) => {
+      console.log(data);
+      UserList.value = data;
+    },
+    (err: any) => {
+      console.log(err);
+      ElMessage.error("未获得相关权限");
+    }
+  );
+};
+
+onMounted(() => {
+  fetchUserList();
+  getTotal();
 });
 
 const handleClick = (row: any) => {
@@ -48,15 +79,29 @@ const handleClick = (row: any) => {
 };
 
 const handleSizeChange = (size: number) => {
-  console.log(size);
+  // 获取页码数
+  const pages = Math.ceil(total.value / size);
+  // 将页码定位到第一页
+  currentPage.value = 1;
+  // 更新请求参数
+  requestParams.value.currentPage = 0;
+  requestParams.value.pageSize = size;
+  pageSizeIndexValue.value = size;
+  fetchUserList();
 };
-const currentPage4 = ref(1);
+
 const handleCurrentChange = (page: number) => {
-  currentPage4.value = page;
+  currentPage.value = page;
+  requestParams.value.currentPage = (page - 1) * pageSizeIndexValue.value;
+  fetchUserList();
 };
 
-
-
+watch(
+  [() => requestParams.value.pageSize, () => requestParams.value.currentPage],
+  () => {
+    fetchUserList();
+  }
+);
 </script>
 
 <template>
@@ -77,12 +122,14 @@ const handleCurrentChange = (page: number) => {
     ></el-input>
     <el-button style="margin-left: 10px" :icon="Search">搜索</el-button>
   </div>
+
   <!-- 按钮 -->
   <el-button type="success" :icon="CirclePlus">新增</el-button>
   <el-button type="danger" :icon="DeleteFilled">批量删除</el-button>
   <el-button type="warning" :icon="UploadFilled">导入</el-button>
   <el-button type="primary" :icon="SoldOut">导出</el-button>
 
+  <!-- 下拉菜单 -->
   <el-dropdown style="margin-top: 40px; margin-left: -385px">
     <el-button type="info">
       全部用户<el-icon class="el-icon--right"><arrow-down /></el-icon>
@@ -98,13 +145,23 @@ const handleCurrentChange = (page: number) => {
     </template>
   </el-dropdown>
 
+  <!-- 表格 -->
   <el-table :data="UserList" border style="margin-top: 15px">
-    <el-table-column prop="registerTime" label="日期" width="120"></el-table-column>
-    <el-table-column prop="username" label="用户名" width="160"></el-table-column>
+    <el-table-column
+      fixed
+      prop="registerTime"
+      label="日期"
+      width="120"
+    ></el-table-column>
+    <el-table-column
+      prop="username"
+      label="用户名"
+      width="160"
+    ></el-table-column>
     <el-table-column prop="name" label="姓名" width="120"></el-table-column>
     <el-table-column prop="role" label="权限" width="120"></el-table-column>
     <el-table-column prop="address" label="地址"></el-table-column>
-    <el-table-column label="操作">
+    <el-table-column fixed="right" label="操作">
       <template #default="scope">
         <el-button
           @click="handleClick(scope.row)"
@@ -125,11 +182,11 @@ const handleCurrentChange = (page: number) => {
     <el-pagination
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
-      :current-page="currentPage4"
-      :page-sizes="[5, 10, 20]"
-      :page-size="10"
+      :current-page="currentPage"
+      :page-sizes="pageSizeOptions"
+      :page-size="pageSizeIndexValue"
       layout="total, sizes, prev, pager, next, jumper"
-      :total="100"
+      :total="total"
     ></el-pagination>
   </div>
 </template>
