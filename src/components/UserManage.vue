@@ -11,9 +11,7 @@ import {
   ArrowDown,
 } from "@element-plus/icons-vue";
 import http from "@/net/api/admin/UserManage";
-import { ElMessage } from "element-plus";
-
-
+import { ElMessage, ElMessageBox } from "element-plus";
 
 const pageSizeOptions = ref([5, 10, 20, 30, 40, 50]);
 const currentPage = ref(1);
@@ -26,8 +24,8 @@ const requestParams = ref({
 
 const UserList = ref([
   {
-    id: 0,
-    name: "",
+    id: "",
+    nickname: "",
     username: "",
     address: "",
     role: "",
@@ -36,18 +34,21 @@ const UserList = ref([
     recommendId: 0,
   },
 ]);
+
 const total = ref(0);
 const getTotal = () => {
   const params = ref({
     pageSize: 0,
     currentPage: 0,
   });
+
   http.getUserInfoList(
     params,
     (data: any) => {
       const list = ref([]);
       list.value = data;
       total.value = data.length;
+      // 将获取到的权限名称去重后显示在页面上
     },
     (err: any) => {
       console.log(err);
@@ -59,7 +60,6 @@ const fetchUserList = () => {
   http.getUserInfoList(
     requestParams,
     (data: any) => {
-      console.log(data);
       UserList.value = data;
     },
     (err: any) => {
@@ -96,6 +96,125 @@ const handleCurrentChange = (page: number) => {
   fetchUserList();
 };
 
+const isCheckboxColumnVisible = ref(false); // 控制多选框列的显示
+const selectedUserIds = ref([]); // 用来存储选中的用户ID列表
+
+const handleBatchDelete = () => {
+  http.batchDeleteUserByAccountIds(
+    selectedUserIds.value,
+    () => {
+      ElMessage.success("删除成功");
+      fetchUserList();
+      selectedUserIds.value = []; // 重置选中的用户ID列表
+      isCheckboxColumnVisible.value = false; // 隐藏多选框列
+    },
+    (err: any) => {
+      console.log(err);
+      ElMessage.error("删除失败");
+    }
+  );
+};
+
+const delectIdList = ref([]); // 用来存储选中的用户ID列表
+const delectUser = () => {
+  http.batchDeleteUserByAccountIds(
+    delectIdList.value,
+    () => {
+      ElMessage.success("删除成功");
+      fetchUserList();
+      selectedUserIds.value = []; // 重置选中的用户ID列表
+      isCheckboxColumnVisible.value = false; // 隐藏多选框列
+    },
+    (err: any) => {
+      console.log(err);
+      ElMessage.error("删除失败");
+    }
+  );
+};
+
+const delectUserById = (row: any) => {
+  // 转换为never类型，防止类型检查报错
+  delectIdList.value.push(row as never);
+  console.log("id:"+delectIdList.value);
+  if (delectIdList.value.length > 0) {
+    // 在某个地方调用 open 函数
+    open()
+      .then((result) => {
+        // 用户确认删除
+        delectUser();
+      })
+      .catch((error) => {
+        // 处理错误
+        console.info("取消删除:", error);
+      });
+  } else {
+    isCheckboxColumnVisible.value = !isCheckboxColumnVisible.value;
+    selectedUserIds.value = []; // 重置选中的用户ID列表
+  }
+};
+
+const toggleCheckboxColumn = () => {
+  if (selectedUserIds.value.length > 0) {
+    // 在某个地方调用 open 函数
+    open()
+      .then((result) => {
+        // 用户确认删除
+        handleBatchDelete();
+      })
+      .catch((error) => {
+        // 处理错误
+        console.error("发生错误:", error);
+      });
+  } else {
+    isCheckboxColumnVisible.value = !isCheckboxColumnVisible.value;
+    selectedUserIds.value = []; // 重置选中的用户ID列表
+  }
+};
+
+const handleSelectionChange = (selection: any) => {
+  selectedUserIds.value = selection.map((item: any) => item.id);
+  console.log(selectedUserIds.value);
+};
+const open = () => {
+  return new Promise((resolve, reject) => {
+    ElMessageBox.confirm("确定进行批量删除操作吗?", "提示", {
+      confirmButtonText: "OK",
+      cancelButtonText: "Cancel",
+      type: "error",
+    })
+      .then(() => {
+        resolve(true); // 用户确认删除，resolve(true)
+      })
+      .catch(() => {
+        reject(false); // 用户取消删除，reject(false)
+      });
+  });
+};
+
+const searchParams = ref({
+  pageSize: 10,
+  currentPage: 0,
+  keyWords: "",
+});
+const SearchUserList = () => {
+  if (searchParams.value.keyWords === "") {
+    ElMessage.warning("请输入搜索内容");
+    return;
+  }
+
+  http.searchUserBykeywords(
+    searchParams,
+    (data: any) => {
+      console.log(data);
+      UserList.value = data;
+    },
+    (err: any) => {
+      console.log(err);
+      ElMessage.error("发生错误");
+    }
+  );
+};
+
 watch(
   [() => requestParams.value.pageSize, () => requestParams.value.currentPage],
   () => {
@@ -116,39 +235,41 @@ watch(
   <!-- 搜索框 -->
   <div style="padding: 10px 0">
     <el-input
-      style="width: 200px"
+      v-model="searchParams.keyWords"
+      style="width: 190px"
       suffix-icon="el-icon-search"
       placeholder="请输入名称"
     ></el-input>
-    <el-button style="margin-left: 10px" :icon="Search">搜索</el-button>
+    <el-button style="margin-left: 10px" @click="SearchUserList"
+     :icon="Search"
+      >搜索</el-button
+    >
   </div>
 
   <!-- 按钮 -->
   <el-button type="success" :icon="CirclePlus">新增</el-button>
-  <el-button type="danger" :icon="DeleteFilled">批量删除</el-button>
+  <el-button type="danger" :icon="DeleteFilled" @click="toggleCheckboxColumn"
+    >批量删除</el-button
+  >
   <el-button type="warning" :icon="UploadFilled">导入</el-button>
   <el-button type="primary" :icon="SoldOut">导出</el-button>
 
-  <!-- 下拉菜单 -->
-  <el-dropdown style="margin-top: 40px; margin-left: -385px">
-    <el-button type="info">
-      全部用户<el-icon class="el-icon--right"><arrow-down /></el-icon>
-    </el-button>
-    <template #dropdown>
-      <el-dropdown-menu>
-        <el-dropdown-item>Action 1</el-dropdown-item>
-        <el-dropdown-item>Action 2</el-dropdown-item>
-        <el-dropdown-item>Action 3</el-dropdown-item>
-        <el-dropdown-item>Action 4</el-dropdown-item>
-        <el-dropdown-item>Action 5</el-dropdown-item>
-      </el-dropdown-menu>
-    </template>
-  </el-dropdown>
 
   <!-- 表格 -->
-  <el-table :data="UserList" border style="margin-top: 15px">
+  <el-table
+    @selection-change="handleSelectionChange"
+    :data="UserList"
+    border
+    style="margin-top: 15px"
+  >
     <el-table-column
-      fixed
+      v-if="isCheckboxColumnVisible"
+      type="selection"
+      width="45"
+    ></el-table-column>
+
+    <el-table-column fixed prop="id" label="ID" width="200"></el-table-column>
+    <el-table-column
       prop="registerTime"
       label="日期"
       width="120"
@@ -158,7 +279,7 @@ watch(
       label="用户名"
       width="160"
     ></el-table-column>
-    <el-table-column prop="name" label="姓名" width="120"></el-table-column>
+    <el-table-column prop="nickname" label="昵称" width="120"></el-table-column>
     <el-table-column prop="role" label="权限" width="120"></el-table-column>
     <el-table-column prop="address" label="地址"></el-table-column>
     <el-table-column fixed="right" label="操作">
@@ -168,11 +289,14 @@ watch(
           type="warning"
           size="small"
           :icon="EditPen"
-          >编辑<i class="el-icon-edit"></i
-        ></el-button>
-        <el-button type="danger" size="small" :icon="Delete"
-          >删除<i class="el-icon-remove-outline"></i
-        ></el-button>
+          >编辑</el-button>
+        <el-button
+          @click="delectUserById(scope.row.id)"
+          type="danger"
+          size="small"
+          :icon="Delete"
+          >删除</el-button
+        >
       </template>
     </el-table-column>
   </el-table>
