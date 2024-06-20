@@ -1,5 +1,5 @@
 import http from "@/net/ApiService";
-import axios from "axios";
+
 
 function getUserInfoList(params: any, success: any, error: any) {
   let url = "api/admin/account/info";

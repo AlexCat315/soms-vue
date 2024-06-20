@@ -11,7 +11,10 @@ import {
 } from "@element-plus/icons-vue";
 import http from "@/net/api/admin/UserManage";
 import EditUser from "@/components/user_manage/EditUser.vue";
-import AddUser from "@/components/user_manage/AddUser.vue";
+import httpSupplier from "@/net/api/admin/SupplierManager";
+import AddSupplier from "@/components/supplier_manager/AddSupplier.vue";
+
+
 import { ElMessage, ElMessageBox } from "element-plus";
 
 const pageSizeOptions = ref([5, 10, 20, 30, 40, 50]);
@@ -36,15 +39,24 @@ const UserList = ref([
   },
 ]);
 
-const total = ref(0);
-const getTotal = () => {
-  const params = ref({
-    pageSize: 0,
-    currentPage: 0,
-  });
+const ProviderList = ref([
+  {
+    id: "",
+    proCode: "",
+    proName: "",
+    proDesc: "",
+    proContact: "",
+    proPhone: "",
+    proAddress: "",
+    createId: 0,
+    creationDate: "",
+  },
+]);
 
-  http.getUserInfoList(
-    params,
+const total = ref(0);
+
+const getTotal = () => {
+  httpSupplier.getSupplierList(
     (data: any) => {
       const list = ref([]);
       list.value = data;
@@ -57,21 +69,28 @@ const getTotal = () => {
     }
   );
 };
-const fetchUserList = () => {
-  http.getUserInfoList(
+function fetchProviderList() {
+  httpSupplier.getSupplierListByPage(
     requestParams,
     (data: any) => {
-      UserList.value = data;
+      ProviderList.value = data;
+      // 修改时间格式
+      for (let i = 0; i < ProviderList.value.length; i++) {
+        // 将时间格式化为 yyyy-MM-dd
+        ProviderList.value[i].creationDate = ProviderList.value[
+          i
+        ].creationDate.slice(0, 10);
+      }
     },
     (err: any) => {
       console.log(err);
       ElMessage.error("未获得相关权限");
     }
   );
-};
+}
 
 onMounted(() => {
-  fetchUserList();
+  fetchProviderList();
   getTotal();
 });
 
@@ -88,13 +107,13 @@ const handleSizeChange = (size: number) => {
   requestParams.value.currentPage = 0;
   requestParams.value.pageSize = size;
   pageSizeIndexValue.value = size;
-  fetchUserList();
+  fetchProviderList();
 };
 
 const handleCurrentChange = (page: number) => {
   currentPage.value = page;
   requestParams.value.currentPage = (page - 1) * pageSizeIndexValue.value;
-  fetchUserList();
+  fetchProviderList();
 };
 
 const isCheckboxColumnVisible = ref(false); // 控制多选框列的显示
@@ -105,7 +124,7 @@ const handleBatchDelete = () => {
     selectedUserIds.value,
     () => {
       ElMessage.success("删除成功");
-      fetchUserList();
+      fetchProviderList();
       selectedUserIds.value = []; // 重置选中的用户ID列表
       isCheckboxColumnVisible.value = false; // 隐藏多选框列
     },
@@ -122,7 +141,7 @@ const delectUser = () => {
     delectIdList.value,
     () => {
       ElMessage.success("删除成功");
-      fetchUserList();
+      fetchProviderList();
       selectedUserIds.value = []; // 重置选中的用户ID列表
       isCheckboxColumnVisible.value = false; // 隐藏多选框列
     },
@@ -197,17 +216,23 @@ const searchParams = ref({
   currentPage: 0,
   keyWords: "",
 });
-const SearchUserList = () => {
-  if (searchParams.value.keyWords === "") {
+const SearchProviderList = () => {
+  if (searchParams.value.keyWords === ""|| searchParams.value.keyWords ==  undefined) {
     ElMessage.warning("请输入搜索内容");
     return;
   }
-
-  http.searchUserBykeywords(
+  httpSupplier.searchSupplierList(
     searchParams,
     (data: any) => {
       console.log(data);
-      UserList.value = data;
+      ProviderList.value = data;
+      // 修改时间格式
+      for (let i = 0; i < ProviderList.value.length; i++) {
+        // 将时间格式化为 yyyy-MM-dd
+        ProviderList.value[i].creationDate = ProviderList.value[
+          i
+        ].creationDate.slice(0, 10);
+      }
     },
     (err: any) => {
       console.log(err);
@@ -219,11 +244,10 @@ const SearchUserList = () => {
 watch(
   [() => requestParams.value.pageSize, () => requestParams.value.currentPage],
   () => {
-    fetchUserList();
+    fetchProviderList();
   }
 );
 const showUserManagehPanel = ref(false);
-
 
 const userId = ref("");
 const onEditUser = (id: string) => {
@@ -245,12 +269,16 @@ const toggleEditUser = () => {
 
 const openResetPassword = () => {
   return new Promise((resolve, reject) => {
-    ElMessageBox.confirm('<span style="font-family: Arial, sans-serif; font-size: 16px;">确定重置密码?<br><span style=" font-size: 13px;">重置后密码为初始密码：<span style="color: #ff0000;">123456</span></span></span>', "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-      type: "error",
-      dangerouslyUseHTMLString: true, // 允许使用 HTML 字符串
-    })
+    ElMessageBox.confirm(
+      '<span style="font-family: Arial, sans-serif; font-size: 16px;">确定重置密码?<br><span style=" font-size: 13px;">重置后密码为初始密码：<span style="color: #ff0000;">123456</span></span></span>',
+      "提示",
+      {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "error",
+        dangerouslyUseHTMLString: true, // 允许使用 HTML 字符串
+      }
+    )
       .then(() => {
         resolve(true); // 用户确认删除，resolve(true)
       })
@@ -259,7 +287,6 @@ const openResetPassword = () => {
       });
   });
 };
-
 
 const resetPassword = (id: string) => {
   openResetPassword()
@@ -275,8 +302,7 @@ const resetPassword = (id: string) => {
         }
       );
     })
-    .catch((error) => {
-    });
+    .catch((error) => {});
 };
 
 const showAddUser = ref(false);
@@ -284,7 +310,7 @@ const toggleAddUser = () => {
   showAddUser.value = true;
   showUserManagehPanel.value = true;
 };
-const addUser = () => {
+const addSupplier = () => {
   toggleAddUser();
 };
 </script>
@@ -300,14 +326,14 @@ const addUser = () => {
       </el-button>
 
       <EditUser v-if="showEditUser" :userId="userId" />
-      <AddUser v-if="showAddUser" />
+      <AddSupplier v-if="showAddUser"/>
     </div>
   </div>
   <!-- 页签 -->
   <div style="margin-bottom: 20px">
     <el-breadcrumb separator="<">
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>用户管理</el-breadcrumb-item>
+      <el-breadcrumb-item>供应商管理</el-breadcrumb-item>
     </el-breadcrumb>
   </div>
 
@@ -319,13 +345,16 @@ const addUser = () => {
       suffix-icon="el-icon-search"
       placeholder="请输入名称"
     ></el-input>
-    <el-button style="margin-left: 10px" @click="SearchUserList" :icon="Search"
+    <el-button
+      style="margin-left: 10px"
+      @click="SearchProviderList"
+      :icon="Search"
       >搜索</el-button
     >
   </div>
 
   <!-- 按钮 -->
-  <el-button type="success" @click="addUser" :icon="CirclePlus">新增</el-button>
+  <el-button type="success" @click="addSupplier" :icon="CirclePlus">新增</el-button>
   <el-button type="danger" :icon="DeleteFilled" @click="toggleCheckboxColumn"
     >批量删除</el-button
   >
@@ -335,9 +364,9 @@ const addUser = () => {
   <!-- 表格 -->
   <el-table
     @selection-change="handleSelectionChange"
-    :data="UserList"
+    :data="ProviderList"
     border
-    style="margin-top: 15px"
+    style="margin-top: 15px; width: 100%"
   >
     <el-table-column
       v-if="isCheckboxColumnVisible"
@@ -345,20 +374,38 @@ const addUser = () => {
       width="45"
     ></el-table-column>
 
-    <el-table-column fixed prop="id" label="ID" width="200"></el-table-column>
     <el-table-column
-      prop="registerTime"
-      label="日期"
+      fixed
+      prop="proCode"
+      label="供应商编码"
+      width="130"
+    ></el-table-column>
+    <el-table-column
+      prop="creationDate"
+      label="注册日期"
+      width="100"
+    ></el-table-column>
+    <el-table-column
+      prop="proName"
+      label="供应商名称"
+      width="150"
+    ></el-table-column>
+    <el-table-column
+      prop="proContact"
+      label="联系人"
+      width="100"
+    ></el-table-column>
+    <el-table-column
+      prop="proPhone"
+      label="联系电话"
       width="120"
     ></el-table-column>
     <el-table-column
-      prop="username"
-      label="用户名"
-      width="100"
+      width="180"
+      prop="proAddress"
+      label="地址"
     ></el-table-column>
-    <el-table-column prop="nickname" label="昵称" width="120"></el-table-column>
-    <el-table-column prop="role" label="权限" width="120"></el-table-column>
-    <el-table-column width="190" prop="address" label="地址"></el-table-column>
+    <el-table-column width="175" prop="proDesc" label="详情"></el-table-column>
     <el-table-column fixed="right" label="操作">
       <template #default="scope">
         <el-button
@@ -375,14 +422,6 @@ const addUser = () => {
           :icon="Delete"
           >删除</el-button
         >
-        <el-button
-          @click="resetPassword(scope.row.id)"
-          color="#626aef"
-          loading-icon="Eleme"
-          icon="HelpFilled"
-          size="small"
-          >重置密码
-        </el-button>
       </template>
     </el-table-column>
   </el-table>

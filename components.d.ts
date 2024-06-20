@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AccountCard: typeof import('./src/components/main_menu/AccountCard.vue')['default']
+    AddSupplier: typeof import('./src/components/supplier_manager/AddSupplier.vue')['default']
     AddUser: typeof import('./src/components/user_manage/AddUser.vue')['default']
     EditUser: typeof import('./src/components/user_manage/EditUser.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
