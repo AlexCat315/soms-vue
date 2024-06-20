@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
-import axios from "axios";
 import {
   Search,
   CirclePlus,
@@ -225,6 +224,7 @@ watch(
 );
 const showUserManagehPanel = ref(false);
 
+
 const userId = ref("");
 const onEditUser = (id: string) => {
   userId.value = id;
@@ -242,19 +242,15 @@ const toggleEditUser = () => {
   showEditUser.value = true;
   showUserManagehPanel.value = true;
 };
-const uploadUrl = ref(axios.defaults.baseURL + "api/admin/account/save/excel")
+
 const openResetPassword = () => {
   return new Promise((resolve, reject) => {
-    ElMessageBox.confirm(
-      '<span style="font-family: Arial, sans-serif; font-size: 16px;">确定重置密码?<br><span style=" font-size: 13px;">重置后密码为初始密码：<span style="color: #ff0000;">123456</span></span></span>',
-      "提示",
-      {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "error",
-        dangerouslyUseHTMLString: true, // 允许使用 HTML 字符串
-      }
-    )
+    ElMessageBox.confirm('<span style="font-family: Arial, sans-serif; font-size: 16px;">确定重置密码?<br><span style=" font-size: 13px;">重置后密码为初始密码：<span style="color: #ff0000;">123456</span></span></span>', "提示", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "error",
+      dangerouslyUseHTMLString: true, // 允许使用 HTML 字符串
+    })
       .then(() => {
         resolve(true); // 用户确认删除，resolve(true)
       })
@@ -263,6 +259,7 @@ const openResetPassword = () => {
       });
   });
 };
+
 
 const resetPassword = (id: string) => {
   openResetPassword()
@@ -278,7 +275,8 @@ const resetPassword = (id: string) => {
         }
       );
     })
-    .catch((error) => {});
+    .catch((error) => {
+    });
 };
 
 const showAddUser = ref(false);
@@ -289,27 +287,6 @@ const toggleAddUser = () => {
 const addUser = () => {
   toggleAddUser();
 };
-
-// 导出excel
-const exportExcel = () => {
-  http.exportExcel(
-    () => {
-      ElMessage.success("导出成功");
-    },
-    (err: any) => {
-      console.log(err);
-      ElMessage.error("导出失败");
-    }
-  );
-};
-
-const handleUploadSuccess = () => {
-  ElMessage.success("导入成功");
-  fetchUserList();
-}
-const handleUploadError = () => {
-  ElMessage.error("导入失败");
-}
 </script>
 
 <template>
@@ -352,32 +329,15 @@ const handleUploadError = () => {
   <el-button type="danger" :icon="DeleteFilled" @click="toggleCheckboxColumn"
     >批量删除</el-button
   >
- <el-upload
-    :show-file-list="false"
-    :with-credentials="true"
-    :action="uploadUrl"
-    :auto-upload="true"
-    :on-success= "handleUploadSuccess"
-    :on-error="handleUploadError"
-    style="margin-left: 210px; margin-top: -31px"
->
-    <el-button type="warning" icon="UploadFilled">导入</el-button>
-</el-upload>
-
-  <el-button
-    style="margin-left: 300px; margin-top: -55px"
-    type="primary"
-    @click="exportExcel"
-    :icon="SoldOut"
-    >导出</el-button
-  >
+  <el-button type="warning" :icon="UploadFilled">导入</el-button>
+  <el-button type="primary" :icon="SoldOut">导出</el-button>
 
   <!-- 表格 -->
   <el-table
     @selection-change="handleSelectionChange"
     :data="UserList"
     border
-    style="margin-top: -10px"
+    style="margin-top: 15px"
   >
     <el-table-column
       v-if="isCheckboxColumnVisible"

@@ -1,3 +1,73 @@
+<script setup lang="ts">
+import { ref } from "vue";
+import { Fold, User } from "@element-plus/icons-vue";
+import UserManage from "@/components/UserManage.vue";
+import MainMenu from "@/components/MainMenu.vue";
+import SupploerManager from "@/components/SupplierManager.vue";
+import logout from "@/net/api/account/logout";
+import router from "@/routers/Router";
+import { ElMessage } from "element-plus";
+
+const collapseBtnClass = ref("el-icon-s-fold");
+const isCollapse = ref(false);
+const sideWidth = ref(200);
+const logoTextShow = ref(true);
+
+const collape = () => {
+  isCollapse.value = !isCollapse.value;
+  if (isCollapse.value) {
+    sideWidth.value = 64;
+    collapseBtnClass.value = "el-icon-s-unfold";
+    logoTextShow.value = false;
+  } else {
+    sideWidth.value = 200;
+    collapseBtnClass.value = "el-icon-s-fold";
+    logoTextShow.value = true;
+  }
+};
+const handleClickLogout = () => {
+  logout.logout(
+    {},
+    (data: any) => {
+      console.log("logout success");
+      // 清除指定的sessionStorage
+      sessionStorage.removeItem("accountSessionToken");
+      router.push("/login");
+      ElMessage.success("退出成功");
+    },
+    (err: any) => {
+      console.log(err);
+      ElMessage.error("退出失败,请联系管理员");
+    }
+  );
+};
+
+import { inject ,Ref,watch} from 'vue';
+const activeTextColor = ref("#FFd04b");
+
+
+// 接收全局变量
+const globalSelect = inject<Ref<string>>('globalSelect');
+// 检查 globalSelect 是否存在并设置默认值
+if (!globalSelect) {
+  throw new Error('globalSelect is not provided');
+}
+
+const selectIndex = ref(globalSelect);
+
+
+const handleSelect = (index: string) => {
+  selectIndex.value = index;
+  globalSelect.value = index;
+};
+// 监听全局变量变化
+// 监听全局变量变化
+watch(globalSelect, (newValue, oldValue) => {
+  if (newValue === oldValue) return;
+  selectIndex.value = newValue;
+});
+</script>
+
 <template>
   <div
     style="
@@ -16,13 +86,14 @@
         "
       >
         <el-menu
-          :default-openeds="['1', '3']"
           style="height: 100%; overflow-x: hidden"
           background-color="rgb(48, 65, 86)"
           text-color="#FFF"
-          active-text-color="#FFd04b"
+          :active-text-color="activeTextColor"
           :collapse-transition="false"
           :collapse="isCollapse"
+          @select="handleSelect"
+          :default-active="selectIndex"
         >
           <div style="height: 60px; line-height: 60px; text-align: center">
             <img
@@ -37,41 +108,22 @@
             />
             <b style="color: #fff" v-show="logoTextShow">超市订单管理系统</b>
           </div>
-          <el-sub-menu index="1">
-            <template #title>
-              <i class="el-icon-message"></i>
-              <span>导航一</span>
-            </template>
-            <el-menu-item-group>
-              <template #title>分组一</template>
-              <el-menu-item index="1-1">选项1</el-menu-item>
-              <el-menu-item index="1-2">选项2</el-menu-item>
-            </el-menu-item-group>
-            <el-menu-item-group title="分组2">
-              <el-menu-item index="1-3">选项3</el-menu-item>
-            </el-menu-item-group>
-            <el-sub-menu index="1-4">
-              <template #title>选项4</template>
-              <el-menu-item index="1-4-1">选项4-1</el-menu-item>
-            </el-sub-menu>
-          </el-sub-menu>
-          <el-sub-menu index="2">
-            <template #title>
-              <span>导航二</span>
-            </template>
-            <el-menu-item-group>
-              <template #title>分组一</template>
-              <el-menu-item index="2-1">选项1</el-menu-item>
-              <el-menu-item index="2-2">选项2</el-menu-item>
-            </el-menu-item-group>
-            <el-menu-item-group title="分组2">
-              <el-menu-item index="2-3">选项3</el-menu-item>
-            </el-menu-item-group>
-            <el-sub-menu index="2-4">
-              <template #title>选项4</template>
-              <el-menu-item index="2-4-1">选项4-1</el-menu-item>
-            </el-sub-menu>
-          </el-sub-menu>
+          <el-menu-item  index="1">
+            <el-icon color="black"><HomeFilled /></el-icon>
+            <template #title>主菜单</template>
+          </el-menu-item>
+          <el-menu-item index="2">
+            <el-icon color="black"><Avatar /></el-icon>
+            <template #title>用户管理</template>
+          </el-menu-item>
+           <el-menu-item index="3">
+            <el-icon color="black"><Coin /></el-icon>
+            <template #title>供应商管理</template>
+          </el-menu-item>
+          <el-menu-item index="4">
+            <el-icon color="black"><GoodsFilled /></el-icon>
+            <template #title>订单管理</template>
+          </el-menu-item>
         </el-menu>
       </el-aside>
 
@@ -110,58 +162,17 @@
         </el-header>
 
         <el-main>
-          <UserManage />
+          <MainMenu :select="selectIndex" v-if="selectIndex === '1'" />
+          <UserManage v-if="selectIndex === '2'" />
+          <SupploerManager v-if="selectIndex === '3'" />
         </el-main>
       </el-container>
     </el-container>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from "vue";
-import { Fold, User } from "@element-plus/icons-vue";
-import UserManage from "@/components/UserManage.vue";
-import logout from "@/net/api/account/logout";
-import router from "@/routers/Router";
-import { ElMessage } from "element-plus";
-
-const collapseBtnClass = ref("el-icon-s-fold");
-const isCollapse = ref(false);
-const sideWidth = ref(200);
-const logoTextShow = ref(true);
-
-const collape = () => {
-  isCollapse.value = !isCollapse.value;
-  if (isCollapse.value) {
-    sideWidth.value = 64;
-    collapseBtnClass.value = "el-icon-s-unfold";
-    logoTextShow.value = false;
-  } else {
-    sideWidth.value = 200;
-    collapseBtnClass.value = "el-icon-s-fold";
-    logoTextShow.value = true;
-  }
-};
-const handleClickLogout = () => {
-  logout.logout(
-    {},
-    (data: any) => {
-      console.log("logout success");
-      // 清除指定的sessionStorage
-      sessionStorage.removeItem("accountSessionToken");
-      router.push("/login");
-      ElMessage.success("退出成功");
-    },
-    (err: any) => {
-      console.log(err);
-      ElMessage.error("退出失败,请联系管理员");
-    }
-  );
-};
-</script>
-
 <style scoped>
 .headerBg {
-  background-color: #cccccc !important;
+  background-color: #cccccc;
 }
 </style>

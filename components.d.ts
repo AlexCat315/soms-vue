@@ -7,12 +7,14 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AddUser: typeof import('./src/components/AddUser.vue')['default']
-    EditUser: typeof import('./src/components/EditUser.vue')['default']
+    AccountCard: typeof import('./src/components/main_menu/AccountCard.vue')['default']
+    AddUser: typeof import('./src/components/user_manage/AddUser.vue')['default']
+    EditUser: typeof import('./src/components/user_manage/EditUser.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElBreadcrumb: typeof import('element-plus/es')['ElBreadcrumb']
     ElBreadcrumbItem: typeof import('element-plus/es')['ElBreadcrumbItem']
     ElButton: typeof import('element-plus/es')['ElButton']
+    ElCard: typeof import('element-plus/es')['ElCard']
     ElCheckbox: typeof import('element-plus/es')['ElCheckbox']
     ElCheckboxGroup: typeof import('element-plus/es')['ElCheckboxGroup']
     ElCol: typeof import('element-plus/es')['ElCol']
@@ -45,9 +47,15 @@ declare module 'vue' {
     ElTable: typeof import('element-plus/es')['ElTable']
     ElTableColumn: typeof import('element-plus/es')['ElTableColumn']
     ElTimePicker: typeof import('element-plus/es')['ElTimePicker']
+    ElUpload: typeof import('element-plus/es')['ElUpload']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
+    MainMenu: typeof import('./src/components/MainMenu.vue')['default']
+    MyCard: typeof import('./src/components/main_menu/MyCard.vue')['default']
+    OrderCard: typeof import('./src/components/main_menu/OrderCard.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SupplierCard: typeof import('./src/components/main_menu/SupplierCard.vue')['default']
+    SupplierManager: typeof import('./src/components/SupplierManager.vue')['default']
     UserManag: typeof import('./src/components/UserManag.vue')['default']
     UserManage: typeof import('./src/components/UserManage.vue')['default']
   }

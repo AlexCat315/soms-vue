@@ -1,6 +1,5 @@
 import http from "@/net/ApiService";
-import { tr } from "element-plus/es/locale";
-import { register } from "module";
+import axios from "axios";
 
 function getUserInfoList(params: any, success: any, error: any) {
   let url = "api/admin/account/info";
@@ -74,7 +73,15 @@ function addUser(params: any, success: any, error: any) {
     success,
     error
   );
+};
+// 导出excel
+function exportExcel(success: any, error: any) {
+    // 导出excel
+    http.fileDownload("/api/admin/account/export/excel", {}, {
+        method: 'post'
+    },"用户信息").then(success).catch(error);
 }
+
 
 export default {
   getUserInfoList,
@@ -83,5 +90,6 @@ export default {
   getUserInfoById,
   updateUserInfo,
   resetPassword,
-  addUser
+  addUser,
+  exportExcel,
 };
