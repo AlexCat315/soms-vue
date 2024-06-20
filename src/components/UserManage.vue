@@ -8,9 +8,10 @@ import {
   SoldOut,
   EditPen,
   Delete,
-  ArrowDown,
 } from "@element-plus/icons-vue";
 import http from "@/net/api/admin/UserManage";
+import EditUser from "@/components/EditUser.vue";
+import AddUser from "@/components/AddUser.vue";
 import { ElMessage, ElMessageBox } from "element-plus";
 
 const pageSizeOptions = ref([5, 10, 20, 30, 40, 50]);
@@ -135,7 +136,7 @@ const delectUser = () => {
 const delectUserById = (row: any) => {
   // 转换为never类型，防止类型检查报错
   delectIdList.value.push(row as never);
-  console.log("id:"+delectIdList.value);
+  console.log("id:" + delectIdList.value);
   if (delectIdList.value.length > 0) {
     // 在某个地方调用 open 函数
     open()
@@ -178,8 +179,8 @@ const handleSelectionChange = (selection: any) => {
 const open = () => {
   return new Promise((resolve, reject) => {
     ElMessageBox.confirm("确定进行批量删除操作吗?", "提示", {
-      confirmButtonText: "OK",
-      cancelButtonText: "Cancel",
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
       type: "error",
     })
       .then(() => {
@@ -221,9 +222,87 @@ watch(
     fetchUserList();
   }
 );
+const showUserManagehPanel = ref(false);
+
+
+const userId = ref("");
+const onEditUser = (id: string) => {
+  userId.value = id;
+  toggleEditUser();
+};
+
+const toggleClosePanel = () => {
+  showUserManagehPanel.value = false;
+  showEditUser.value = false;
+  showAddUser.value = false;
+};
+
+const showEditUser = ref(false);
+const toggleEditUser = () => {
+  showEditUser.value = true;
+  showUserManagehPanel.value = true;
+};
+
+const openResetPassword = () => {
+  return new Promise((resolve, reject) => {
+    ElMessageBox.confirm('<span style="font-family: Arial, sans-serif; font-size: 16px;">确定重置密码?<br><span style=" font-size: 13px;">重置后密码为初始密码：<span style="color: #ff0000;">123456</span></span></span>', "提示", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "error",
+      dangerouslyUseHTMLString: true, // 允许使用 HTML 字符串
+    })
+      .then(() => {
+        resolve(true); // 用户确认删除，resolve(true)
+      })
+      .catch(() => {
+        reject(false); // 用户取消删除，reject(false)
+      });
+  });
+};
+
+
+const resetPassword = (id: string) => {
+  openResetPassword()
+    .then((result) => {
+      // 用户确认删除
+      http.resetPassword(
+        id,
+        () => {
+          ElMessage.success("重置密码成功");
+        },
+        (err: any) => {
+          ElMessage.error("重置密码失败");
+        }
+      );
+    })
+    .catch((error) => {
+    });
+};
+
+const showAddUser = ref(false);
+const toggleAddUser = () => {
+  showAddUser.value = true;
+  showUserManagehPanel.value = true;
+};
+const addUser = () => {
+  toggleAddUser();
+};
 </script>
 
 <template>
+  <div v-if="showUserManagehPanel" class="search-container">
+    <div class="card">
+      <el-button
+        class="search_close_button"
+        type="link"
+        @click="toggleClosePanel"
+      >
+      </el-button>
+
+      <EditUser v-if="showEditUser" :userId="userId" />
+      <AddUser v-if="showAddUser" />
+    </div>
+  </div>
   <!-- 页签 -->
   <div style="margin-bottom: 20px">
     <el-breadcrumb separator="<">
@@ -240,20 +319,18 @@ watch(
       suffix-icon="el-icon-search"
       placeholder="请输入名称"
     ></el-input>
-    <el-button style="margin-left: 10px" @click="SearchUserList"
-     :icon="Search"
+    <el-button style="margin-left: 10px" @click="SearchUserList" :icon="Search"
       >搜索</el-button
     >
   </div>
 
   <!-- 按钮 -->
-  <el-button type="success" :icon="CirclePlus">新增</el-button>
+  <el-button type="success" @click="addUser" :icon="CirclePlus">新增</el-button>
   <el-button type="danger" :icon="DeleteFilled" @click="toggleCheckboxColumn"
     >批量删除</el-button
   >
   <el-button type="warning" :icon="UploadFilled">导入</el-button>
   <el-button type="primary" :icon="SoldOut">导出</el-button>
-
 
   <!-- 表格 -->
   <el-table
@@ -277,19 +354,20 @@ watch(
     <el-table-column
       prop="username"
       label="用户名"
-      width="160"
+      width="100"
     ></el-table-column>
     <el-table-column prop="nickname" label="昵称" width="120"></el-table-column>
     <el-table-column prop="role" label="权限" width="120"></el-table-column>
-    <el-table-column prop="address" label="地址"></el-table-column>
+    <el-table-column width="190" prop="address" label="地址"></el-table-column>
     <el-table-column fixed="right" label="操作">
       <template #default="scope">
         <el-button
-          @click="handleClick(scope.row)"
-          type="warning"
+          @click="onEditUser(scope.row.id)"
+          type="primary"
           size="small"
           :icon="EditPen"
-          >编辑</el-button>
+          >编辑</el-button
+        >
         <el-button
           @click="delectUserById(scope.row.id)"
           type="danger"
@@ -297,6 +375,14 @@ watch(
           :icon="Delete"
           >删除</el-button
         >
+        <el-button
+          @click="resetPassword(scope.row.id)"
+          color="#626aef"
+          loading-icon="Eleme"
+          icon="HelpFilled"
+          size="small"
+          >重置密码
+        </el-button>
       </template>
     </el-table-column>
   </el-table>
@@ -318,5 +404,45 @@ watch(
 <style scoped>
 .headerBg {
   background-color: #cccccc !important;
+}
+.search-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.92);
+  /* 半透明背景 */
+  z-index: 999;
+  /* 确保在最顶层 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.search_close_button {
+  border: none;
+  width: 32px;
+  height: 32px;
+  position: absolute;
+  z-index: 101;
+  right: 25px;
+  top: 20px;
+  text-indent: -9999em;
+  background: url(@/assets/img/search_panel_close.png) no-repeat;
+  background-image: url("@/assets/img/search_panel_close.png");
+  background-size: auto;
+  background-size: 100%;
+}
+.card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 400px;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  padding: 20px;
+  z-index: 1;
+  border-radius: 20px;
+  border: 2px solid #eaebee;
 }
 </style>
