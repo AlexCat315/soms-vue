@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import http from "@/net/api/admin/UserManage";
 import httpSupplier from "@/net/api/admin/SupplierManager";
 import { ElMessage } from "element-plus";
 
@@ -14,7 +13,6 @@ const providerFrom = ref({
   proFax: "",
 });
 
-// 点击修改按钮后，将 userFrom 的值赋值给 userUpdateFrom，并将 role 值转换为后台需要的格式
 const AddSupplier = () => {
   httpSupplier.addSupplier(
     providerFrom,

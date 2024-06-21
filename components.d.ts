@@ -8,8 +8,12 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AccountCard: typeof import('./src/components/main_menu/AccountCard.vue')['default']
+    AddBill: typeof import('./src/components/bill_manager/AddBill.vue')['default']
     AddSupplier: typeof import('./src/components/supplier_manager/AddSupplier.vue')['default']
     AddUser: typeof import('./src/components/user_manage/AddUser.vue')['default']
+    BillManager: typeof import('./src/components/BillManager.vue')['default']
+    EditBill: typeof import('./src/components/bill_manager/EditBill.vue')['default']
+    EditSupplier: typeof import('./src/components/supplier_manager/EditSupplier.vue')['default']
     EditUser: typeof import('./src/components/user_manage/EditUser.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElBreadcrumb: typeof import('element-plus/es')['ElBreadcrumb']
@@ -53,6 +57,7 @@ declare module 'vue' {
     MainMenu: typeof import('./src/components/MainMenu.vue')['default']
     MyCard: typeof import('./src/components/main_menu/MyCard.vue')['default']
     OrderCard: typeof import('./src/components/main_menu/OrderCard.vue')['default']
+    PayInfo: typeof import('./src/components/bill_manager/PayInfo.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SupplierCard: typeof import('./src/components/main_menu/SupplierCard.vue')['default']

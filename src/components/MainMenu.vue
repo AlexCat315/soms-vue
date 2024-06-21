@@ -22,12 +22,12 @@ const props = defineProps({
   <div class="card">
     <div>
       <div class="container">
-        <MyCard class="item" style="transform: scale(0.7)" />
-        <AccountCard class="item" style="transform: scale(0.7)" />
+        <MyCard  class="item" style="transform: scale(0.7);" />
+        <AccountCard class="item" style="transform: scale(0.7);" />
       </div>
        <div class="container">
-        <SupplierCard class="item" style="transform: scale(0.7)" />
-        <OrderCard class="item" style="transform: scale(0.7)" />
+        <SupplierCard class="item" style="transform: scale(0.7);" />
+        <OrderCard class="item" style="transform: scale(0.7);" />
       </div>
     </div>
   </div>

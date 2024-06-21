@@ -1,19 +1,21 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
+import axios from "axios";
 import {
   Search,
   CirclePlus,
   DeleteFilled,
-  UploadFilled,
   SoldOut,
   EditPen,
   Delete,
 } from "@element-plus/icons-vue";
-import httpSupplier from "@/net/api/admin/SupplierManager";
-import AddSupplier from "@/components/supplier_manager/AddSupplier.vue";
-import EditSupplier from "@/components/supplier_manager/EditSupplier.vue";
-import axios from "axios";
+import http from "@/net/api/admin/UserManage";
+import EditUser from "@/components/user_manage/EditUser.vue";
 import { ElMessage, ElMessageBox } from "element-plus";
+import httpBill from "@/net/api/admin/BillManager";
+import PayInfo from "@/components/bill_manager/PayInfo.vue";
+import AddBill from "@/components/bill_manager/AddBill.vue";
+import EditBill from "@/components/bill_manager/EditBill.vue";
 
 const pageSizeOptions = ref([5, 10, 20, 30, 40, 50]);
 const currentPage = ref(1);
@@ -24,29 +26,42 @@ const requestParams = ref({
   currentPage: currentPage.value - 1,
 });
 
-const ProviderList = ref([
+const UserList = ref([
   {
     id: "",
-    proCode: "",
-    proName: "",
-    proDesc: "",
-    proContact: "",
-    proPhone: "",
-    proAddress: "",
-    createId: 0,
+    nickname: "",
+    username: "",
+    address: "",
+    role: "",
+    registerTime: "",
+    recommendCode: "",
+    recommendId: 0,
+  },
+]);
+
+const BillList = ref([
+  {
+    id: "",
+    billCode: "",
+    productName: "",
+    productDesc: "",
+    productUnit: "",
+    productCount: "",
+    totalPrice: "",
+    isPayment: "",
+    createdBy: "",
     creationDate: "",
+    modifyBy: "",
+    modifyDate: "",
+    proName: "",
   },
 ]);
 
 const total = ref(0);
-
 const getTotal = () => {
-  httpSupplier.getSupplierList(
+  httpBill.getBillList(
     (data: any) => {
-      const list = ref([]);
-      list.value = data;
       total.value = data.length;
-      // 将获取到的权限名称去重后显示在页面上
     },
     (err: any) => {
       console.log(err);
@@ -54,17 +69,19 @@ const getTotal = () => {
     }
   );
 };
-function fetchProviderList() {
-  httpSupplier.getSupplierListByPage(
+
+const fetchBillList = () => {
+  httpBill.getBillListByPage(
     requestParams,
     (data: any) => {
-      ProviderList.value = data;
+      BillList.value = data;
       // 修改时间格式
-      for (let i = 0; i < ProviderList.value.length; i++) {
+      for (let i = 0; i < BillList.value.length; i++) {
         // 将时间格式化为 yyyy-MM-dd
-        ProviderList.value[i].creationDate = ProviderList.value[
-          i
-        ].creationDate.slice(0, 10);
+        BillList.value[i].creationDate = BillList.value[i].creationDate.slice(
+          0,
+          10
+        );
       }
     },
     (err: any) => {
@@ -72,41 +89,39 @@ function fetchProviderList() {
       ElMessage.error("未获得相关权限");
     }
   );
-}
+};
 
 onMounted(() => {
-  fetchProviderList();
+  fetchBillList();
   getTotal();
 });
 
 const handleSizeChange = (size: number) => {
-  // 获取页码数
-  const pages = Math.ceil(total.value / size);
   // 将页码定位到第一页
   currentPage.value = 1;
   // 更新请求参数
   requestParams.value.currentPage = 0;
   requestParams.value.pageSize = size;
   pageSizeIndexValue.value = size;
-  fetchProviderList();
+  fetchBillList();
 };
 
 const handleCurrentChange = (page: number) => {
   currentPage.value = page;
   requestParams.value.currentPage = (page - 1) * pageSizeIndexValue.value;
-  fetchProviderList();
+  fetchBillList();
 };
 
 const isCheckboxColumnVisible = ref(false); // 控制多选框列的显示
-const selectedSupplierIds = ref([]); // 用来存储选中的用户ID列表
+const selectedBillIds = ref([]); // 用来存储选中的用户ID列表
 
 const handleBatchDelete = () => {
-  httpSupplier.batchDeleteSupplier(
-    selectedSupplierIds.value,
+  httpBill.batchDeleteBill(
+    selectedBillIds,
     () => {
       ElMessage.success("删除成功");
-      fetchProviderList();
-      selectedSupplierIds.value = []; // 重置选中的用户ID列表
+      fetchBillList();
+      selectedBillIds.value = []; // 重置选中的用户ID列表
       isCheckboxColumnVisible.value = false; // 隐藏多选框列
     },
     (err: any) => {
@@ -117,13 +132,13 @@ const handleBatchDelete = () => {
 };
 
 const delectIdList = ref([]); // 用来存储选中的用户ID列表
-const delectSupplier = () => {
-  httpSupplier.batchDeleteSupplier(
-    delectIdList.value,
+const delectBill = () => {
+  httpBill.batchDeleteBill(
+    delectIdList,
     () => {
       ElMessage.success("删除成功");
-      fetchProviderList();
-      selectedSupplierIds.value = []; // 重置选中的用户ID列表
+      fetchBillList();
+      selectedBillIds.value = []; // 重置选中的用户ID列表
       isCheckboxColumnVisible.value = false; // 隐藏多选框列
     },
     (err: any) => {
@@ -133,16 +148,15 @@ const delectSupplier = () => {
   );
 };
 
-const delectSupplierById = (row: any) => {
+const delectBillById = (row: any) => {
   // 转换为never类型，防止类型检查报错
   delectIdList.value.push(row as never);
-  console.log("id:" + delectIdList.value);
   if (delectIdList.value.length > 0) {
     // 在某个地方调用 open 函数
     open()
       .then((result) => {
         // 用户确认删除
-        delectSupplier();
+        delectBill();
       })
       .catch((error) => {
         // 处理错误
@@ -150,12 +164,12 @@ const delectSupplierById = (row: any) => {
       });
   } else {
     isCheckboxColumnVisible.value = !isCheckboxColumnVisible.value;
-    selectedSupplierIds.value = []; // 重置选中的用户ID列表
+    selectedBillIds.value = []; // 重置选中的用户ID列表
   }
 };
 
 const toggleCheckboxColumn = () => {
-  if (selectedSupplierIds.value.length > 0) {
+  if (selectedBillIds.value.length > 0) {
     // 在某个地方调用 open 函数
     open()
       .then((result) => {
@@ -168,13 +182,13 @@ const toggleCheckboxColumn = () => {
       });
   } else {
     isCheckboxColumnVisible.value = !isCheckboxColumnVisible.value;
-    selectedSupplierIds.value = []; // 重置选中的用户ID列表
+    selectedBillIds.value = []; // 重置选中的用户ID列表
   }
 };
 
 const handleSelectionChange = (selection: any) => {
-  selectedSupplierIds.value = selection.map((item: any) => item.id);
-  console.log(selectedSupplierIds.value);
+  selectedBillIds.value = selection.map((item: any) => item.id);
+  console.log(selectedBillIds.value);
 };
 const open = () => {
   return new Promise((resolve, reject) => {
@@ -193,30 +207,21 @@ const open = () => {
 };
 
 const searchParams = ref({
-  pageSize: 10,
-  currentPage: 0,
+  pageSize: 100,
+  pageSizeIndex: 0,
   keyWords: "",
 });
-const SearchProviderList = () => {
-  if (
-    searchParams.value.keyWords === "" ||
-    searchParams.value.keyWords == undefined
-  ) {
+const SearchBillList = () => {
+  if (searchParams.value.keyWords === "") {
     ElMessage.warning("请输入搜索内容");
     return;
   }
-  httpSupplier.searchSupplierList(
+
+  httpBill.searchBill(
     searchParams,
     (data: any) => {
       console.log(data);
-      ProviderList.value = data;
-      // 修改时间格式
-      for (let i = 0; i < ProviderList.value.length; i++) {
-        // 将时间格式化为 yyyy-MM-dd
-        ProviderList.value[i].creationDate = ProviderList.value[
-          i
-        ].creationDate.slice(0, 10);
-      }
+      BillList.value = data;
     },
     (err: any) => {
       console.log(err);
@@ -228,43 +233,43 @@ const SearchProviderList = () => {
 watch(
   [() => requestParams.value.pageSize, () => requestParams.value.currentPage],
   () => {
-    fetchProviderList();
+    fetchBillList();
   }
 );
-const showSupplierManagehPanel = ref(false);
+const showBillManagehPanel = ref(false);
 
-const providerId = ref("");
-const onEditSupplier = (id: string) => {
-  providerId.value = id;
-  console.log(id);
-  toggleEditSupplier();
+const bilId = ref("");
+const onEditBill = (id: string) => {
+  bilId.value = id;
+  toggleEditBill();
 };
 
 const toggleClosePanel = () => {
-  showSupplierManagehPanel.value = false;
-  showEditSupplier.value = false;
-  showAddSupplier.value = false;
+  showBillManagehPanel.value = false;
+  showEditBill.value = false;
+  showAddBill.value = false;
 };
 
-const showEditSupplier = ref(false);
-const toggleEditSupplier = () => {
-  showEditSupplier.value = true;
-  showSupplierManagehPanel.value = true;
+const showEditBill = ref(false);
+const toggleEditBill = () => {
+  showEditBill.value = true;
+  showBillManagehPanel.value = true;
 };
 
+const uploadUrl = ref(axios.defaults.baseURL + "api/bill/save/excel");
 
-const showAddSupplier = ref(false);
+const showAddBill = ref(false);
 const toggleAddUser = () => {
-  showAddSupplier.value = true;
-  showSupplierManagehPanel.value = true;
+  showAddBill.value = true;
+  showBillManagehPanel.value = true;
 };
-const addSupplier = () => {
+const addBill = () => {
   toggleAddUser();
 };
 
 // 导出excel
 const exportExcel = () => {
-  httpSupplier.exportExcel(
+  httpBill.exportExcel(
     () => {
       ElMessage.success("导出成功");
     },
@@ -274,18 +279,29 @@ const exportExcel = () => {
     }
   );
 };
-const uploadUrl = ref(axios.defaults.baseURL + "api/admin/provider/save/excel");
+
 const handleUploadSuccess = () => {
   ElMessage.success("导入成功");
-  fetchProviderList();
+  fetchBillList();
 };
 const handleUploadError = () => {
   ElMessage.error("导入失败");
 };
+const parentMessage = ref("");
+
+const receivedMessage = ref(false);
+
+const handleChildData = (data: boolean) => {
+  receivedMessage.value = data;
+};
+const showPayInfo = (id: string) => {
+  parentMessage.value = id;
+  receivedMessage.value = true;
+};
 </script>
 
 <template>
-  <div v-if="showSupplierManagehPanel" class="search-container">
+  <div v-if="showBillManagehPanel" class="search-container">
     <div class="card">
       <el-button
         class="search_close_button"
@@ -294,15 +310,23 @@ const handleUploadError = () => {
       >
       </el-button>
 
-      <EditSupplier v-if="showEditSupplier" :providerId="providerId" />
-      <AddSupplier v-if="showAddSupplier" />
+      <EditBill v-if="showEditBill" :billId="bilId" />
+      <AddBill v-if="showAddBill" />
     </div>
   </div>
+  <div></div>
+  <!-- 商品详情 -->
+  <div v-if="receivedMessage" class="pay-info-container">
+    <div class="pay-card">
+      <PayInfo :message="parentMessage" @childData="handleChildData" />
+    </div>
+  </div>
+
   <!-- 页签 -->
   <div style="margin-bottom: 20px">
     <el-breadcrumb separator="<">
       <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>供应商管理</el-breadcrumb-item>
+      <el-breadcrumb-item>订单管理</el-breadcrumb-item>
     </el-breadcrumb>
   </div>
 
@@ -314,18 +338,13 @@ const handleUploadError = () => {
       suffix-icon="el-icon-search"
       placeholder="请输入名称"
     ></el-input>
-    <el-button
-      style="margin-left: 10px"
-      @click="SearchProviderList"
-      :icon="Search"
+    <el-button style="margin-left: 10px" @click="SearchBillList" :icon="Search"
       >搜索</el-button
     >
   </div>
 
   <!-- 按钮 -->
-  <el-button type="success" @click="addSupplier" :icon="CirclePlus"
-    >新增</el-button
-  >
+  <el-button type="success" @click="addBill" :icon="CirclePlus">新增</el-button>
   <el-button type="danger" :icon="DeleteFilled" @click="toggleCheckboxColumn"
     >批量删除</el-button
   >
@@ -340,6 +359,7 @@ const handleUploadError = () => {
   >
     <el-button type="warning" icon="UploadFilled">导入</el-button>
   </el-upload>
+
   <el-button
     style="margin-left: 300px; margin-top: -55px"
     type="primary"
@@ -347,12 +367,13 @@ const handleUploadError = () => {
     :icon="SoldOut"
     >导出</el-button
   >
+
   <!-- 表格 -->
   <el-table
     @selection-change="handleSelectionChange"
-    :data="ProviderList"
+    :data="BillList"
     border
-    style="margin-top: -5px; width: 100%"
+    style="margin-top: -10px"
   >
     <el-table-column
       v-if="isCheckboxColumnVisible"
@@ -362,47 +383,63 @@ const handleUploadError = () => {
 
     <el-table-column
       fixed
-      prop="proCode"
-      label="供应商编码"
-      width="120"
-    ></el-table-column>
-    <el-table-column
-      prop="creationDate"
-      label="注册日期"
-      width="105"
-    ></el-table-column>
-    <el-table-column
-      prop="proName"
-      label="供应商名称"
-      width="150"
-    ></el-table-column>
-    <el-table-column
-      prop="proContact"
-      label="联系人"
+      prop="billCode"
+      label="账单编码"
       width="100"
     ></el-table-column>
     <el-table-column
-      prop="proPhone"
-      label="联系电话"
+      prop="creationDate"
+      label="创建日期"
       width="120"
     ></el-table-column>
     <el-table-column
-      width="180"
-      prop="proAddress"
-      label="地址"
+      prop="productName"
+      label="商品日期"
+      width="70"
     ></el-table-column>
-    <el-table-column width="175" prop="proDesc" label="详情"></el-table-column>
+    <el-table-column
+      prop="productDesc"
+      label="商品描述"
+      width="120"
+    ></el-table-column>
+    <el-table-column
+      prop="isPayment"
+      label="是否支付"
+      width="120"
+    ></el-table-column>
+    <el-table-column
+      width="100"
+      prop="productUnit"
+      label="商品数量"
+    ></el-table-column>
+    <el-table-column
+      width="100"
+      prop="totalPrice"
+      label="商品价格"
+    ></el-table-column>
+    <el-table-column
+      width="110"
+      prop="proName"
+      label="供应商"
+    ></el-table-column>
     <el-table-column fixed="right" label="操作">
       <template #default="scope">
         <el-button
-          @click="onEditSupplier(scope.row.id)"
+          @click="showPayInfo(scope.row.id)"
+          color="#fa5327"
+          icon="View"
+          size="small"
+          >商品详情
+        </el-button>
+        <el-button
+          @click="onEditBill(scope.row.id)"
           type="primary"
           size="small"
           :icon="EditPen"
           >编辑</el-button
         >
         <el-button
-          @click="delectSupplierById(scope.row.id)"
+          @click="delectBillById(scope.row.id)"
           type="danger"
           size="small"
           :icon="Delete"
@@ -429,6 +466,20 @@ const handleUploadError = () => {
 <style scoped>
 .headerBg {
   background-color: #cccccc !important;
+}
+.pay-info-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.92);
+  /* 半透明背景 */
+  z-index: 999;
+  /* 确保在最顶层 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .search-container {
   position: fixed;
@@ -469,5 +520,17 @@ const handleUploadError = () => {
   z-index: 1;
   border-radius: 20px;
   border: 1px solid #eaebee;
+}
+.pay-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 330px;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  padding: 20px;
+  z-index: 1;
+  border-radius: 20px;
+  border: 0px solid #eaebee;
 }
 </style>

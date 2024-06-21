@@ -1,6 +1,5 @@
 import http from "@/net/ApiService";
 
-
 function getUserInfoList(params: any, success: any, error: any) {
   let url = "api/admin/account/info";
   http.post(
@@ -73,19 +72,26 @@ function addUser(params: any, success: any, error: any) {
     success,
     error
   );
-};
+}
 // 导出excel
 function exportExcel(success: any, error: any) {
-    // 导出excel
-    http.fileDownload("/api/admin/account/export/excel", {}, {
-        method: 'post'
-    },"用户信息").then(success).catch(error);
+  // 导出excel
+  http
+    .fileDownload(
+      "/api/admin/account/export/excel",
+      {},
+      {
+        method: "post",
+      },
+      "用户信息"
+    )
+    .then(success)
+    .catch(error);
 }
-
 
 export default {
   getUserInfoList,
-  batchDeleteUserByAccountIds,
+  batchDeleteBillByIds: batchDeleteUserByAccountIds,
   searchUserBykeywords,
   getUserInfoById,
   updateUserInfo,

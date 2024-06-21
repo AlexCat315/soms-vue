@@ -7,6 +7,7 @@ import SupploerManager from "@/components/SupplierManager.vue";
 import logout from "@/net/api/account/logout";
 import router from "@/routers/Router";
 import { ElMessage } from "element-plus";
+import BillManager from "@/components/BillManager.vue";
 
 const collapseBtnClass = ref("el-icon-s-fold");
 const isCollapse = ref(false);
@@ -60,7 +61,6 @@ const handleSelect = (index: string) => {
   selectIndex.value = index;
   globalSelect.value = index;
 };
-// 监听全局变量变化
 // 监听全局变量变化
 watch(globalSelect, (newValue, oldValue) => {
   if (newValue === oldValue) return;
@@ -165,6 +165,7 @@ watch(globalSelect, (newValue, oldValue) => {
           <MainMenu :select="selectIndex" v-if="selectIndex === '1'" />
           <UserManage v-if="selectIndex === '2'" />
           <SupploerManager v-if="selectIndex === '3'" />
+          <BillManager v-if="selectIndex === '4'" />
         </el-main>
       </el-container>
     </el-container>

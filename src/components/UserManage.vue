@@ -102,7 +102,7 @@ const isCheckboxColumnVisible = ref(false); // 控制多选框列的显示
 const selectedUserIds = ref([]); // 用来存储选中的用户ID列表
 
 const handleBatchDelete = () => {
-  http.batchDeleteUserByAccountIds(
+  http.batchDeleteBillByIds(
     selectedUserIds.value,
     () => {
       ElMessage.success("删除成功");
@@ -119,7 +119,7 @@ const handleBatchDelete = () => {
 
 const delectIdList = ref([]); // 用来存储选中的用户ID列表
 const delectUser = () => {
-  http.batchDeleteUserByAccountIds(
+  http.batchDeleteBillByIds(
     delectIdList.value,
     () => {
       ElMessage.success("删除成功");
@@ -242,7 +242,7 @@ const toggleEditUser = () => {
   showEditUser.value = true;
   showUserManagehPanel.value = true;
 };
-const uploadUrl = ref(axios.defaults.baseURL + "api/admin/account/save/excel")
+const uploadUrl = ref(axios.defaults.baseURL + "api/admin/account/save/excel");
 const openResetPassword = () => {
   return new Promise((resolve, reject) => {
     ElMessageBox.confirm(
@@ -306,10 +306,10 @@ const exportExcel = () => {
 const handleUploadSuccess = () => {
   ElMessage.success("导入成功");
   fetchUserList();
-}
+};
 const handleUploadError = () => {
   ElMessage.error("导入失败");
-}
+};
 </script>
 
 <template>
@@ -352,17 +352,17 @@ const handleUploadError = () => {
   <el-button type="danger" :icon="DeleteFilled" @click="toggleCheckboxColumn"
     >批量删除</el-button
   >
- <el-upload
+  <el-upload
     :show-file-list="false"
     :with-credentials="true"
     :action="uploadUrl"
     :auto-upload="true"
-    :on-success= "handleUploadSuccess"
+    :on-success="handleUploadSuccess"
     :on-error="handleUploadError"
     style="margin-left: 210px; margin-top: -31px"
->
+  >
     <el-button type="warning" icon="UploadFilled">导入</el-button>
-</el-upload>
+  </el-upload>
 
   <el-button
     style="margin-left: 300px; margin-top: -55px"
@@ -483,6 +483,6 @@ const handleUploadError = () => {
   padding: 20px;
   z-index: 1;
   border-radius: 20px;
-  border: 2px solid #eaebee;
+  border: 1px solid #eaebee;
 }
 </style>
