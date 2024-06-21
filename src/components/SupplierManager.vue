@@ -10,11 +10,10 @@ import {
   Delete,
 } from "@element-plus/icons-vue";
 import http from "@/net/api/admin/UserManage";
-import EditUser from "@/components/user_manage/EditUser.vue";
 import httpSupplier from "@/net/api/admin/SupplierManager";
 import AddSupplier from "@/components/supplier_manager/AddSupplier.vue";
-
-
+import EditSupplier from "@/components/supplier_manager/EditSupplier.vue";
+import axios from "axios";
 import { ElMessage, ElMessageBox } from "element-plus";
 
 const pageSizeOptions = ref([5, 10, 20, 30, 40, 50]);
@@ -25,19 +24,6 @@ const requestParams = ref({
   pageSize: pageSizeIndexValue.value,
   currentPage: currentPage.value - 1,
 });
-
-const UserList = ref([
-  {
-    id: "",
-    nickname: "",
-    username: "",
-    address: "",
-    role: "",
-    registerTime: "",
-    recommendCode: "",
-    recommendId: 0,
-  },
-]);
 
 const ProviderList = ref([
   {
@@ -94,10 +80,6 @@ onMounted(() => {
   getTotal();
 });
 
-const handleClick = (row: any) => {
-  console.log(row);
-};
-
 const handleSizeChange = (size: number) => {
   // 获取页码数
   const pages = Math.ceil(total.value / size);
@@ -117,15 +99,15 @@ const handleCurrentChange = (page: number) => {
 };
 
 const isCheckboxColumnVisible = ref(false); // 控制多选框列的显示
-const selectedUserIds = ref([]); // 用来存储选中的用户ID列表
+const selectedSupplierIds = ref([]); // 用来存储选中的用户ID列表
 
 const handleBatchDelete = () => {
-  http.batchDeleteUserByAccountIds(
-    selectedUserIds.value,
+  httpSupplier.batchDeleteSupplier(
+    selectedSupplierIds.value,
     () => {
       ElMessage.success("删除成功");
       fetchProviderList();
-      selectedUserIds.value = []; // 重置选中的用户ID列表
+      selectedSupplierIds.value = []; // 重置选中的用户ID列表
       isCheckboxColumnVisible.value = false; // 隐藏多选框列
     },
     (err: any) => {
@@ -136,13 +118,13 @@ const handleBatchDelete = () => {
 };
 
 const delectIdList = ref([]); // 用来存储选中的用户ID列表
-const delectUser = () => {
-  http.batchDeleteUserByAccountIds(
+const delectSupplier = () => {
+  httpSupplier.batchDeleteSupplier(
     delectIdList.value,
     () => {
       ElMessage.success("删除成功");
       fetchProviderList();
-      selectedUserIds.value = []; // 重置选中的用户ID列表
+      selectedSupplierIds.value = []; // 重置选中的用户ID列表
       isCheckboxColumnVisible.value = false; // 隐藏多选框列
     },
     (err: any) => {
@@ -152,7 +134,7 @@ const delectUser = () => {
   );
 };
 
-const delectUserById = (row: any) => {
+const delectSupplierById = (row: any) => {
   // 转换为never类型，防止类型检查报错
   delectIdList.value.push(row as never);
   console.log("id:" + delectIdList.value);
@@ -161,7 +143,7 @@ const delectUserById = (row: any) => {
     open()
       .then((result) => {
         // 用户确认删除
-        delectUser();
+        delectSupplier();
       })
       .catch((error) => {
         // 处理错误
@@ -169,12 +151,12 @@ const delectUserById = (row: any) => {
       });
   } else {
     isCheckboxColumnVisible.value = !isCheckboxColumnVisible.value;
-    selectedUserIds.value = []; // 重置选中的用户ID列表
+    selectedSupplierIds.value = []; // 重置选中的用户ID列表
   }
 };
 
 const toggleCheckboxColumn = () => {
-  if (selectedUserIds.value.length > 0) {
+  if (selectedSupplierIds.value.length > 0) {
     // 在某个地方调用 open 函数
     open()
       .then((result) => {
@@ -187,13 +169,13 @@ const toggleCheckboxColumn = () => {
       });
   } else {
     isCheckboxColumnVisible.value = !isCheckboxColumnVisible.value;
-    selectedUserIds.value = []; // 重置选中的用户ID列表
+    selectedSupplierIds.value = []; // 重置选中的用户ID列表
   }
 };
 
 const handleSelectionChange = (selection: any) => {
-  selectedUserIds.value = selection.map((item: any) => item.id);
-  console.log(selectedUserIds.value);
+  selectedSupplierIds.value = selection.map((item: any) => item.id);
+  console.log(selectedSupplierIds.value);
 };
 const open = () => {
   return new Promise((resolve, reject) => {
@@ -217,7 +199,10 @@ const searchParams = ref({
   keyWords: "",
 });
 const SearchProviderList = () => {
-  if (searchParams.value.keyWords === ""|| searchParams.value.keyWords ==  undefined) {
+  if (
+    searchParams.value.keyWords === "" ||
+    searchParams.value.keyWords == undefined
+  ) {
     ElMessage.warning("请输入搜索内容");
     return;
   }
@@ -247,24 +232,25 @@ watch(
     fetchProviderList();
   }
 );
-const showUserManagehPanel = ref(false);
+const showSupplierManagehPanel = ref(false);
 
-const userId = ref("");
-const onEditUser = (id: string) => {
-  userId.value = id;
-  toggleEditUser();
+const providerId = ref("");
+const onEditSupplier = (id: string) => {
+  providerId.value = id;
+  console.log(id);
+  toggleEditSupplier();
 };
 
 const toggleClosePanel = () => {
-  showUserManagehPanel.value = false;
-  showEditUser.value = false;
-  showAddUser.value = false;
+  showSupplierManagehPanel.value = false;
+  showEditSupplier.value = false;
+  showAddSupplier.value = false;
 };
 
-const showEditUser = ref(false);
-const toggleEditUser = () => {
-  showEditUser.value = true;
-  showUserManagehPanel.value = true;
+const showEditSupplier = ref(false);
+const toggleEditSupplier = () => {
+  showEditSupplier.value = true;
+  showSupplierManagehPanel.value = true;
 };
 
 const openResetPassword = () => {
@@ -305,18 +291,39 @@ const resetPassword = (id: string) => {
     .catch((error) => {});
 };
 
-const showAddUser = ref(false);
+const showAddSupplier = ref(false);
 const toggleAddUser = () => {
-  showAddUser.value = true;
-  showUserManagehPanel.value = true;
+  showAddSupplier.value = true;
+  showSupplierManagehPanel.value = true;
 };
 const addSupplier = () => {
   toggleAddUser();
 };
+
+// 导出excel
+const exportExcel = () => {
+  httpSupplier.exportExcel(
+    () => {
+      ElMessage.success("导出成功");
+    },
+    (err: any) => {
+      console.log(err);
+      ElMessage.error("导出失败");
+    }
+  );
+};
+const uploadUrl = ref(axios.defaults.baseURL + "api/admin/provider/save/excel");
+const handleUploadSuccess = () => {
+  ElMessage.success("导入成功");
+  fetchProviderList();
+};
+const handleUploadError = () => {
+  ElMessage.error("导入失败");
+};
 </script>
 
 <template>
-  <div v-if="showUserManagehPanel" class="search-container">
+  <div v-if="showSupplierManagehPanel" class="search-container">
     <div class="card">
       <el-button
         class="search_close_button"
@@ -325,8 +332,8 @@ const addSupplier = () => {
       >
       </el-button>
 
-      <EditUser v-if="showEditUser" :userId="userId" />
-      <AddSupplier v-if="showAddUser"/>
+      <EditSupplier v-if="showEditSupplier" :providerId="providerId" />
+      <AddSupplier v-if="showAddSupplier" />
     </div>
   </div>
   <!-- 页签 -->
@@ -354,19 +361,36 @@ const addSupplier = () => {
   </div>
 
   <!-- 按钮 -->
-  <el-button type="success" @click="addSupplier" :icon="CirclePlus">新增</el-button>
+  <el-button type="success" @click="addSupplier" :icon="CirclePlus"
+    >新增</el-button
+  >
   <el-button type="danger" :icon="DeleteFilled" @click="toggleCheckboxColumn"
     >批量删除</el-button
   >
-  <el-button type="warning" :icon="UploadFilled">导入</el-button>
-  <el-button type="primary" :icon="SoldOut">导出</el-button>
-
+  <el-upload
+    :show-file-list="false"
+    :with-credentials="true"
+    :action="uploadUrl"
+    :auto-upload="true"
+    :on-success="handleUploadSuccess"
+    :on-error="handleUploadError"
+    style="margin-left: 210px; margin-top: -31px"
+  >
+    <el-button type="warning" icon="UploadFilled">导入</el-button>
+  </el-upload>
+  <el-button
+    style="margin-left: 300px; margin-top: -55px"
+    type="primary"
+    @click="exportExcel"
+    :icon="SoldOut"
+    >导出</el-button
+  >
   <!-- 表格 -->
   <el-table
     @selection-change="handleSelectionChange"
     :data="ProviderList"
     border
-    style="margin-top: 15px; width: 100%"
+    style="margin-top: -5px; width: 100%"
   >
     <el-table-column
       v-if="isCheckboxColumnVisible"
@@ -378,12 +402,12 @@ const addSupplier = () => {
       fixed
       prop="proCode"
       label="供应商编码"
-      width="130"
+      width="120"
     ></el-table-column>
     <el-table-column
       prop="creationDate"
       label="注册日期"
-      width="100"
+      width="105"
     ></el-table-column>
     <el-table-column
       prop="proName"
@@ -409,14 +433,14 @@ const addSupplier = () => {
     <el-table-column fixed="right" label="操作">
       <template #default="scope">
         <el-button
-          @click="onEditUser(scope.row.id)"
+          @click="onEditSupplier(scope.row.id)"
           type="primary"
           size="small"
           :icon="EditPen"
           >编辑</el-button
         >
         <el-button
-          @click="delectUserById(scope.row.id)"
+          @click="delectSupplierById(scope.row.id)"
           type="danger"
           size="small"
           :icon="Delete"

@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref,onMounted } from "vue";
 import http from "@/net/api/admin/UserManage";
 import httpSupplier from "@/net/api/admin/SupplierManager";
 import { ElMessage } from "element-plus";
 
 const providerFrom = ref({
+  id: "",
   proCode: "",
   proName: "",
   proDesc: "",
@@ -15,19 +16,30 @@ const providerFrom = ref({
 });
 
 // 点击修改按钮后，将 userFrom 的值赋值给 userUpdateFrom，并将 role 值转换为后台需要的格式
-const AddSupplier = () => {
-  httpSupplier.addSupplier(
+const UpdateSupplier = () => {
+  httpSupplier.updateSupplier(
     providerFrom,
     () => {
-      console.log("新增供应商成功");
-      ElMessage.success("新增供应商成功");
+      console.log("修改供应商成功");
+      ElMessage.success("修改供应商成功");
     },
     () => {
-      console.log("新增供应商失败");
-      ElMessage.error("新增供应商失败");
+      console.log("修改供应商失败");
+      ElMessage.error("修改供应商失败");
     }
   );
 };
+// 接受父组件传递过来的 userId
+const props = defineProps<{ providerId: String }>();
+
+// 将 userId 设置为响应式引用
+const providerId = ref(props.providerId);
+
+onMounted(() => {
+  httpSupplier.getSupplierInfoById(providerId.value.toString()).then((res) => {
+    providerFrom.value = res.data;
+  });
+});
 </script>
 
 <template>
@@ -39,7 +51,7 @@ const AddSupplier = () => {
       margin-left: 145px;
     "
   >
-    新增供应商
+    修改供应商
   </h1>
 
   <!-- Form -->
@@ -180,8 +192,8 @@ const AddSupplier = () => {
           type="primary"
           plain
           round
-          @click="AddSupplier"
-          >新增供应商</el-button
+          @click="UpdateSupplier"
+          >修改供应商</el-button
         >
       </el-form-item>
     </el-form>
