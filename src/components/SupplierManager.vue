@@ -9,7 +9,6 @@ import {
   EditPen,
   Delete,
 } from "@element-plus/icons-vue";
-import http from "@/net/api/admin/UserManage";
 import httpSupplier from "@/net/api/admin/SupplierManager";
 import AddSupplier from "@/components/supplier_manager/AddSupplier.vue";
 import EditSupplier from "@/components/supplier_manager/EditSupplier.vue";
@@ -272,23 +271,6 @@ const openResetPassword = () => {
         reject(false); // 用户取消删除，reject(false)
       });
   });
-};
-
-const resetPassword = (id: string) => {
-  openResetPassword()
-    .then((result) => {
-      // 用户确认删除
-      http.resetPassword(
-        id,
-        () => {
-          ElMessage.success("重置密码成功");
-        },
-        (err: any) => {
-          ElMessage.error("重置密码失败");
-        }
-      );
-    })
-    .catch((error) => {});
 };
 
 const showAddSupplier = ref(false);
