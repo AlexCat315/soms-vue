@@ -33,7 +33,7 @@ npm install
 
 部署和运行
 
-    导入项目：将项目导入到 webStroe或vscode。
+    导入项目：将项目导入到 WebStrom或vscode。
     运行npm install导入依赖
     访问项目：在浏览器中访问 http://localhost:5173 以查看项目运行情况。
 
