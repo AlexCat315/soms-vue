@@ -3,7 +3,7 @@
 该项目是一个基于 Vue-TypeScript-Vite技术栈构建的超市订单管理系统。以下是项目的详细信息和使用指南。
 
 
-后端项目 [Github](https://github.com/MishonChen/demo-vue.git)仓库
+后端项目 [Github](https://github.com/MishonChen/soms-springboot)仓库
 
 
 项目技术栈
