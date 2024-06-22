@@ -156,6 +156,7 @@ const toLogin = () => {
 .root {
   width: 100%;
   height: 100vh;
+  background: linear-gradient(to bottom, #97cfec, #fad0c4);
 }
 
 .card {

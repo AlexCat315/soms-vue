@@ -40,10 +40,14 @@ router.beforeEach(async (to, from, next) => {
       if (isLoggedIn) {
         next(); // 如果用户已登录，放行到其他页面
       } else {
-        // 如果用户未登录，重定向到登录页面
-        next({ name: "Login" });
+        // 如果用户未登录，重定向到登录页面,但是可以前往注册页面
+        if (to.name === "Register") {
+          next();
+        } else {
+          next({ name: "Login" });
+        }
       }
     }
 });
-
+  
 export default router;

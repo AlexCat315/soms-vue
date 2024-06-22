@@ -3,10 +3,7 @@ import MyCard from "@/components/main_menu/MyCard.vue";
 import AccountCard from "@/components/main_menu/AccountCard.vue";
 import SupplierCard from "@/components/main_menu/SupplierCard.vue";
 import OrderCard from "@/components/main_menu/OrderCard.vue";
-const props = defineProps({
-  //子组件接收父组件传递过来的值
-  select: String,
-});
+
 //使用父组件传递过来的值
 </script>
 
@@ -22,19 +19,18 @@ const props = defineProps({
   <div class="card">
     <div>
       <div class="container">
-        <MyCard  class="item" style="transform: scale(0.7);" />
-        <AccountCard class="item" style="transform: scale(0.7);" />
+        <MyCard class="item" style="transform: scale(0.7)" />
+        <AccountCard class="item" style="transform: scale(0.7)" />
       </div>
-       <div class="container">
-        <SupplierCard class="item" style="transform: scale(0.7);" />
-        <OrderCard class="item" style="transform: scale(0.7);" />
+      <div class="container">
+        <SupplierCard class="item" style="transform: scale(0.7)" />
+        <OrderCard class="item" style="transform: scale(0.7)" />
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-
 .container {
   display: flex;
   /* 这将使子元素横向排列 */

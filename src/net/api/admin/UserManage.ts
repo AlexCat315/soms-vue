@@ -87,6 +87,19 @@ function exportExcel(success: any, error: any) {
     )
     .then(success)
     .catch(error);
+};
+function getAccountInfo( success: any, error: any) {
+  let url = "/api/admin/account/basic/info";
+  http.post(
+    url,
+    {},
+    success,
+    error
+  );
+};
+function updatePassword(params: any, success: any, error: any) {
+  let url = "/api/account/reset/password";
+  http.post(url, params, success, error);
 }
 
 export default {
@@ -98,4 +111,6 @@ export default {
   resetPassword,
   addUser,
   exportExcel,
+  getAccountInfo,
+  updatePassword,
 };

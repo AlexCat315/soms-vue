@@ -8,6 +8,7 @@ import logout from "@/net/api/account/logout";
 import router from "@/routers/Router";
 import { ElMessage } from "element-plus";
 import BillManager from "@/components/BillManager.vue";
+import MyInfo from "@/components/MyInfo.vue";
 
 const collapseBtnClass = ref("el-icon-s-fold");
 const isCollapse = ref(false);
@@ -43,19 +44,17 @@ const handleClickLogout = () => {
   );
 };
 
-import { inject ,Ref,watch} from 'vue';
+import { inject, Ref, watch } from "vue";
 const activeTextColor = ref("#FFd04b");
 
-
 // 接收全局变量
-const globalSelect = inject<Ref<string>>('globalSelect');
+const globalSelect = inject<Ref<string>>("globalSelect");
 // 检查 globalSelect 是否存在并设置默认值
 if (!globalSelect) {
-  throw new Error('globalSelect is not provided');
+  throw new Error("globalSelect is not provided");
 }
 
 const selectIndex = ref(globalSelect);
-
 
 const handleSelect = (index: string) => {
   selectIndex.value = index;
@@ -66,6 +65,10 @@ watch(globalSelect, (newValue, oldValue) => {
   if (newValue === oldValue) return;
   selectIndex.value = newValue;
 });
+const toMyInfo = () => {
+  selectIndex.value = "5";
+  globalSelect.value = "5";
+};
 </script>
 
 <template>
@@ -108,7 +111,7 @@ watch(globalSelect, (newValue, oldValue) => {
             />
             <b style="color: #fff" v-show="logoTextShow">超市订单管理系统</b>
           </div>
-          <el-menu-item  index="1">
+          <el-menu-item index="1">
             <el-icon color="black"><HomeFilled /></el-icon>
             <template #title>主菜单</template>
           </el-menu-item>
@@ -116,13 +119,17 @@ watch(globalSelect, (newValue, oldValue) => {
             <el-icon color="black"><Avatar /></el-icon>
             <template #title>用户管理</template>
           </el-menu-item>
-           <el-menu-item index="3">
+          <el-menu-item index="3">
             <el-icon color="black"><Coin /></el-icon>
             <template #title>供应商管理</template>
           </el-menu-item>
           <el-menu-item index="4">
             <el-icon color="black"><GoodsFilled /></el-icon>
             <template #title>订单管理</template>
+          </el-menu-item>
+          <el-menu-item index="5">
+            <el-icon color="black"><Stamp /></el-icon>
+            <template #title>个人中心</template>
           </el-menu-item>
         </el-menu>
       </el-aside>
@@ -151,8 +158,8 @@ watch(globalSelect, (newValue, oldValue) => {
 
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item>个人信息</el-dropdown-item>
-                <el-dropdown-item>修改密码</el-dropdown-item>
+                <el-dropdown-item @click="toMyInfo()">个人信息</el-dropdown-item>
+                <el-dropdown-item @click="toMyInfo()">修改密码</el-dropdown-item>
                 <el-dropdown-item @click="handleClickLogout()"
                   >退出</el-dropdown-item
                 >
@@ -166,6 +173,7 @@ watch(globalSelect, (newValue, oldValue) => {
           <UserManage v-if="selectIndex === '2'" />
           <SupploerManager v-if="selectIndex === '3'" />
           <BillManager v-if="selectIndex === '4'" />
+          <MyInfo v-if="selectIndex === '5'" />
         </el-main>
       </el-container>
     </el-container>

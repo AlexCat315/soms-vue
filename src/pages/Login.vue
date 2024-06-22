@@ -108,7 +108,7 @@ const toRegister = () => {
         </el-form>
 
         <div>
-          <el-divider @click="toRegister" class="register-divider"
+          <el-divider @click="toRegister()" class="register-divider"
             >没有账号？</el-divider
           >
           <el-button
@@ -116,7 +116,7 @@ const toRegister = () => {
             type="success"
             plain
             round
-            @click="toRegister"
+            @click="toRegister()"
             >立即注册</el-button
           >
         </div>
@@ -129,7 +129,9 @@ const toRegister = () => {
 .root {
   width: 100%;
   height: 100vh;
+  background: linear-gradient(to bottom, #97cfec, #fad0c4);
 }
+
 
 .card {
   position: absolute;

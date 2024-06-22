@@ -7,6 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    Account: typeof import('./src/components/myinfo/Account.vue')['default']
     AccountCard: typeof import('./src/components/main_menu/AccountCard.vue')['default']
     AddBill: typeof import('./src/components/bill_manager/AddBill.vue')['default']
     AddSupplier: typeof import('./src/components/supplier_manager/AddSupplier.vue')['default']
@@ -55,13 +56,17 @@ declare module 'vue' {
     ElUpload: typeof import('element-plus/es')['ElUpload']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
     MainMenu: typeof import('./src/components/MainMenu.vue')['default']
+    MyBill: typeof import('./src/components/myinfo/MyBill.vue')['default']
     MyCard: typeof import('./src/components/main_menu/MyCard.vue')['default']
+    MyInfo: typeof import('./src/components/MyInfo.vue')['default']
     OrderCard: typeof import('./src/components/main_menu/OrderCard.vue')['default']
     PayInfo: typeof import('./src/components/bill_manager/PayInfo.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    Select: typeof import('./src/components/myinfo/Select.vue')['default']
     SupplierCard: typeof import('./src/components/main_menu/SupplierCard.vue')['default']
     SupplierManager: typeof import('./src/components/SupplierManager.vue')['default']
+    User: typeof import('./src/components/myinfo/User.vue')['default']
     UserManag: typeof import('./src/components/UserManag.vue')['default']
     UserManage: typeof import('./src/components/UserManage.vue')['default']
   }
