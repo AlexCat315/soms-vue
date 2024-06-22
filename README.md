@@ -1,9 +1,56 @@
-# Vue 3 + TypeScript + Vite
+# 超市订单管理系统 
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+该项目是一个基于 Vue-TypeScript-Vite技术栈构建的超市订单管理系统。以下是项目的详细信息和使用指南。
 
-## Recommended Setup
 
-- [VS Code](https://code.visualstudio.com/) + [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (previously Volar) and disable Vetur
+后端项目 [Github](https://github.com/MishonChen/demo-vue.git)仓库
 
-- Use [vue-tsc](https://github.com/vuejs/language-tools/tree/master/packages/tsc) for performing the same type checking from the command line, or for generating d.ts files for SFCs.
+
+项目技术栈
+
+    请确保本机安装node.js(推荐使用20+)
+
+项目使用
+1. 克隆项目
+
+
+``` bash
+cd https://github.com/MishonChen/soms-vue.git
+```
+
+
+
+2. 运行npm install
+
+运行npm install 导入依赖
+
+
+``` bash
+npm install
+```
+
+
+
+部署和运行
+
+    导入项目：将项目导入到 webStroe或vscode。
+    运行npm install导入依赖
+    访问项目：在浏览器中访问 http://localhost:5173 以查看项目运行情况。
+
+注意事项
+
+    确保本机拥有node.js。
+    确保node.js能够适配依赖。
+    若遇到依赖问题，检查 node版本配置并重新导入依赖。
+
+贡献指南
+
+欢迎任何形式的贡献，包括但不限于：
+
+    提交代码
+    报告 Bug
+    提出新功能建议
+
+联系方式
+
+若有任何问题或建议，请通过 GitHub Issues 进行反馈。
