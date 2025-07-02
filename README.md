@@ -1,6 +1,6 @@
-# 超市订单管理系统 
+# 智慧新零售管理系统 
 
-该项目是一个基于 Vue-TypeScript-Vite技术栈构建的超市订单管理系统。以下是项目的详细信息和使用指南。
+该项目是一个基于 Vue-TypeScript-Vite技术栈构建的智慧新零售管理系统。以下是项目的详细信息和使用指南。
 
 
 后端项目 [Github](https://github.com/MishonChen/soms-springboot)仓库
