@@ -15,7 +15,7 @@
 
 
 ``` bash
-git clone https://github.com/MishonChen/soms-vue.git
+git clone https://github.com/ALexCat315/soms-vue.git
 ```
 
 
