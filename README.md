@@ -3,7 +3,7 @@
 该项目是一个基于 Vue-TypeScript-Vite技术栈构建的智慧新零售管理系统。以下是项目的详细信息和使用指南。
 
 
-后端项目 [Github](https://github.com/MishonChen/soms-springboot)仓库
+后端项目 [Github](https://github.com/AlexCat315/soms-springboot)仓库
 
 
 项目技术栈
